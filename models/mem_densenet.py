@@ -85,17 +85,20 @@ class _DenseBlock(nn.Module):
     def __init__(self, num_layers, num_input_features, bn_size, growth_rate, drop_rate, efficient=False):
         super(_DenseBlock, self).__init__()
         for i in range(num_layers):
+            num_channels = num_input_features + i * growth_rate
             layer = _DenseLayer(
-                num_input_features + i * growth_rate,
+                num_channels,
                 growth_rate=growth_rate,
                 bn_size=bn_size,
                 drop_rate=drop_rate,
                 efficient=efficient,
             )
             self.add_module('denselayer%d' % (i + 1), layer)
+        self.num_mem_channels = num_channels # how large the memory needs to be
+
 
     def forward(self, init_features):
-        mem = torch.zeros((init_features.size(0), 330, init_features.size(2), init_features.size(3)), 
+        mem = torch.zeros((init_features.size(0), self.num_mem_channels, init_features.size(2), init_features.size(3)), 
             device=init_features.device,
             dtype=init_features.dtype,
             requires_grad=False)

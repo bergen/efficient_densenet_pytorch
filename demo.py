@@ -4,6 +4,7 @@ import time
 import torch
 from torchvision import datasets, transforms
 from models import DenseNet
+from models.mem_densenet import DenseNet as MemDensenet
 
 
 class AverageMeter(object):
@@ -206,7 +207,7 @@ def train(model, train_set, valid_set, test_set, save, n_epochs=300,
 
 
 def demo(data, save, depth=100, growth_rate=12, efficient=True, valid_size=5000,
-         n_epochs=300, batch_size=64, seed=None):
+         n_epochs=300, batch_size=64, model_type='densenet', seed=None):
     """
     A demo to show off training of efficient DenseNets.
     Trains and evaluates a DenseNet-BC on CIFAR-10.
@@ -232,8 +233,8 @@ def demo(data, save, depth=100, growth_rate=12, efficient=True, valid_size=5000,
     block_config = [(depth - 4) // 6 for _ in range(3)]
 
     # Data transforms
-    mean=[0.49139968  0.48215841  0.44653091]
-    stdv= [0.24703223  0.24348513  0.26158784]
+    mean=[0.49139968,  0.48215841,  0.44653091]
+    stdv= [0.24703223,  0.24348513,  0.26158784]
     train_transforms = transforms.Compose([
         transforms.RandomCrop(32, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -260,15 +261,24 @@ def demo(data, save, depth=100, growth_rate=12, efficient=True, valid_size=5000,
         valid_set = None
 
     # Models
-    model = DenseNet(
-        growth_rate=growth_rate,
-        block_config=block_config,
-        num_init_features=growth_rate*2,
-        num_classes=10,
-        small_inputs=True,
-        efficient=efficient,
-    )
-    print(model)
+    if model_type=='densenet':
+        model = DenseNet(
+            growth_rate=growth_rate,
+            block_config=block_config,
+            num_init_features=growth_rate*2,
+            num_classes=10,
+            small_inputs=True,
+            efficient=efficient,
+        )
+    elif model_type=='mem_densenet':
+        model = MemDensenet(
+            growth_rate=growth_rate,
+            block_config=block_config,
+            num_init_features=growth_rate*2,
+            num_classes=10,
+            small_inputs=True,
+            efficient=efficient,
+        )
     
     # Print number of parameters
     num_params = sum(p.numel() for p in model.parameters())
