@@ -22,11 +22,11 @@ class MemCat(Function):
             ctx.prefix_len = prefix_len
             ctx.use_prefix = True
 
-            mem[:, prefix_len:prefix_len+suffix_len, :, :] = b #concatenate along dim 1
+            mem.data[:, prefix_len:prefix_len+suffix_len, :, :] = b #concatenate along dim 1
             return mem[:, :prefix_len+suffix_len, :, :]
         else:
             ctx.use_prefix = False
-            mem[:, :b.size(1), :] = b
+            mem.data[:, :b.size(1), :] = b
             return mem[:, :b.size(1), :, :]
 
     @staticmethod
